@@ -1,0 +1,10 @@
+.customer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    margin: 2rem;
+}
+
