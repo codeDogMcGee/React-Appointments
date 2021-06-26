@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 import makeApiRequest from "./api";
-import { ACTIVE_CUSTOMERS_ENDPOINT, ACTIVE_EMPLOYEES_ENDPOINT, MAKE_NEW_APPOINTMENT_ENDPOINT } from "./util/endpoints"
+import { ACTIVE_CUSTOMERS_ENDPOINT, ACTIVE_EMPLOYEES_ENDPOINT, APPOINTMENT_ENDPOINT } from "./util/endpoints"
 import Layout from "./components/Layout/Layout";
 import { datePlusMinutes, APPOINTMENT_TIME_MINUTES } from "./util/datesAndTimes";
 import "./App.css";
@@ -18,6 +18,7 @@ const App = () =>  {
   // View state
   const [view, setView] = useState("");
   const [loading, setLoading] = useState(true);
+  const [appointments, setAppointments] = useState(null)
 
   // Make appointment view state
   const [appointmentDateTimePicked, setAppointmentDateTimePicked] = useState(null);
@@ -36,6 +37,10 @@ const App = () =>  {
   };
   const onGetEmployeeSuccess = (employees_array) => {
     setEmployees(employees_array);
+    setLoading(false);  
+  };
+  const onGetAppointmentsSuccess = (appointments_array) => {
+    setAppointments(appointments_array);
     setLoading(false);  
   };
   const setError = (errorMessage) => {
@@ -58,11 +63,9 @@ const App = () =>  {
         customer: customerSelected.id,
         employee: employeeSelected.id
       }
-  
-      console.log('Sumbmitted Appointment');
-      console.log(appointmentObject)
 
-      makeApiRequest("POST", MAKE_NEW_APPOINTMENT_ENDPOINT, onPostAppointmentSuccess, setError, appointmentObject)
+      setLoading(true);
+      makeApiRequest("POST", APPOINTMENT_ENDPOINT, onPostAppointmentSuccess, setError, appointmentObject)
 
       setMakeAppointmentError("");
     } 
@@ -78,6 +81,9 @@ const App = () =>  {
 
     setLoading(true);
     makeApiRequest("GET", ACTIVE_EMPLOYEES_ENDPOINT, onGetEmployeeSuccess, setError)
+
+    setLoading(true);
+    makeApiRequest("GET", APPOINTMENT_ENDPOINT, onGetAppointmentsSuccess, setError)
 
   }, [setCustomers, setLoading, setEmployees]);
 
@@ -101,6 +107,8 @@ const App = () =>  {
             employeeSelected={employeeSelected}
             setEmployeeSelected={setEmployeeSelected}
             
+            appointments={appointments}
+
             submitNewAppointment={submitNewAppointment}
             newAppointment={newAppointment}
             setNewAppointemnt={setNewAppointemnt}

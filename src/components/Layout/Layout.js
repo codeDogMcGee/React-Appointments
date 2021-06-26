@@ -1,6 +1,7 @@
-import Customers from '../Customers/Customers'
-import NavBar from '../NavBar/NavBar';
-import MakeAppointment from '../MakeAppointment/MakeAppointment'
+import Customers from "../Customers/Customers";
+import NavBar from "../NavBar/NavBar";
+import MakeAppointment from "../MakeAppointment/MakeAppointment";
+import Appointments from "../Appointments/Appointments";
 
 const Layout = (props) => {
 
@@ -36,6 +37,14 @@ const Layout = (props) => {
                                 setEmployeeSelected={props.setEmployeeSelected}
                               />
             break;
+        case "appointments":
+                layoutComponent = <Appointments 
+                                    appointments={props.appointments}
+                                    loading={props.loading}
+                                    employees={props.employees}
+                                    customers={props.customers}
+                                  />
+                break;
         default:
             layoutComponent = <div />
     }

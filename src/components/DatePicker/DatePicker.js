@@ -42,8 +42,9 @@ const DatePickerComponent = ({ appointmentDateTimePicked, setAppointmentDateTime
         <DatePicker 
             selected={appointmentDateTimePicked}
             onChange={(date) => onChange(date)}
+            
             showTimeSelect
-        
+            
             timeFormtat="HH:mm"
             timeIntervals={APPOINTMENT_TIME_MINUTES}
             

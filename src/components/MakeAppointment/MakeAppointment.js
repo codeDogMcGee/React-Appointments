@@ -41,7 +41,7 @@ const MakeAppointment = ({
                         setAppointmentDateTimePicked={setAppointmentDateTimePicked}
                     />
                 </label>
-                <input type="submit" value="Make Appointment" />
+                <input type="submit" value="Make Appointment" className="btn" />
             </form>
             
             <div className="error">{ makeAppointmentError }</div>

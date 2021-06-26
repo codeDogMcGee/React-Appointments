@@ -1,24 +1,17 @@
 import "./NavBar.css";
 
 const NavBar = (props) => {
-    const viewCustomersButtonClick = (e) => {
-        props.setView("customers");
-    };
-
-    const viewHomeButtonClick = (e) => {
-        props.setView("");
-    };
-
-    const viewMakeAppointmentButtonClick = (e) => {
-        props.setView("make-appointment");
-    };
+    const setViewOnClick = (view) => {
+        props.setView(view)
+    }
 
     return (
         <div className="nav">
-            <button className="logo" onClick={viewHomeButtonClick}><h1 >Logo</h1></button>
+            <button className="logo" onClick={() => setViewOnClick("")}><h1 >Logo</h1></button>
             <div className="nav-buttons">
-                <button onClick={viewCustomersButtonClick}>View Customers</button>
-                <button onClick={viewMakeAppointmentButtonClick}>Make Appointment</button>
+                <button className="btn" onClick={() => setViewOnClick("customers")}>View Customers</button>
+                <button className="btn" onClick={() => setViewOnClick("make-appointment")}>Make Appointment</button>
+                <button className="btn" onClick={() => setViewOnClick("appointments")}>View Appointments</button>
             </div>
         </div>
     )
