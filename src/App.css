@@ -9,10 +9,36 @@ h1,h2,h3,h4,h5 {
 }
 
 .btn {
-    
     min-width: 100px;
-
+    max-width: 300px;
     background-color: transparent;
     border-radius: 10px;
     padding: .5rem 1rem;
 }
+
+.errors {
+    text-align: center;
+    font-weight: bold;
+    color: red;
+}
+
+.errors-ul li {
+    margin: 1rem 0;
+}
+
+form {
+    display: grid;
+    grid-template-columns: auto auto;
+    row-gap: 1rem;
+    column-gap: .5rem;
+
+    margin: 2rem 0;
+}
+
+form :last-child {
+    grid-column: 1 / span 2;
+}
+
+/* form label {
+    margin: 2rem;
+} */

@@ -7,12 +7,12 @@ import { datePlusMinutes, APPOINTMENT_TIME_MINUTES } from "./util/datesAndTimes"
 import "./App.css";
 
 
-const DEFAULT_NEW_APPOINTMENT = {
-  startDateTime: null,
-  endDateTime: null,
-  customer: null,
-  employee: null
-}
+// const DEFAULT_NEW_APPOINTMENT = {
+//   startDateTime: null,
+//   endDateTime: null,
+//   customer: null,
+//   employee: null
+// }
 
 const App = () =>  {
   // View state
@@ -24,8 +24,12 @@ const App = () =>  {
   const [appointmentDateTimePicked, setAppointmentDateTimePicked] = useState(null);
   const [employeeSelected, setEmployeeSelected] = useState(null);
   const [customerSelected, setCustomerSelected] = useState(null);
-  const [newAppointment, setNewAppointemnt] = useState(DEFAULT_NEW_APPOINTMENT);
+  // const [newAppointment, setNewAppointemnt] = useState(DEFAULT_NEW_APPOINTMENT);
   const [makeAppointmentError, setMakeAppointmentError] = useState("");
+
+  // Login state
+  // const [loginError, setLoginError] = useState("");
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
   // Users state
   const [customers, setCustomers] = useState([]);
@@ -51,6 +55,7 @@ const App = () =>  {
     setCustomers(customers_array);
     setLoading(false);
   };
+  // const on
 
   const submitNewAppointment = (e) => {
 
@@ -88,7 +93,6 @@ const App = () =>  {
   }, [setCustomers, setLoading, setEmployees]);
 
   return (
-    <div className="App">
       <Layout 
             loading={loading}
             makeAppointmentError={makeAppointmentError}
@@ -98,6 +102,11 @@ const App = () =>  {
             
             appointmentDateTimePicked={appointmentDateTimePicked}
             setAppointmentDateTimePicked={setAppointmentDateTimePicked}
+
+            // loginError={loginError}
+            // setLoginError={setLoginError}
+            loggedInUser={loggedInUser}
+            setLoggedInUser={setLoggedInUser}
 
             customers={customers}
             customerSelected = {customerSelected}
@@ -110,10 +119,9 @@ const App = () =>  {
             appointments={appointments}
 
             submitNewAppointment={submitNewAppointment}
-            newAppointment={newAppointment}
-            setNewAppointemnt={setNewAppointemnt}
+            // newAppointment={newAppointment}
+            // setNewAppointemnt={setNewAppointemnt}
       />
-    </div>
   );
 }
 
