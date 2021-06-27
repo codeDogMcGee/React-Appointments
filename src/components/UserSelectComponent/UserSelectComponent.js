@@ -10,18 +10,25 @@ const UserSelectComponent = ({ selectList, setSelectValue, selectedValue }) => {
         person ? setSelectValue(person) : setSelectValue({})
     };
 
+    // useEffect(() => {
+    //     if (selectValues.length === 1){  // default selectValues has one item
+    //         setSelectValues([...selectValues, ...selectList]);
+    //     }
+
+    //     // if (selectedValue) setSelectItem(selectedValue);
+    // }, [selectList, selectValues]);
+
     useEffect(() => {
         if (selectValues.length === 1){  // default selectValues has one item
             setSelectValues([...selectValues, ...selectList]);
         }
-    }, [selectList, selectValues]);
 
-    useEffect(() => {
         if (selectedValue) setSelectItem(selectedValue);
-    }, [selectedValue]);
+    }, [selectedValue, selectValues, selectList]);
+    // setSelectItem(selectedValue);
 
     return (
-        <select 
+        <select
             value={selectItem.id} 
             onChange={selectOnChange}
         >

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 import makeApiRequest from "./api";
-import { ACTIVE_CUSTOMERS_ENDPOINT, ACTIVE_EMPLOYEES_ENDPOINT, APPOINTMENT_ENDPOINT } from "./util/endpoints"
+import { ACTIVE_CUSTOMERS_ENDPOINT, ACTIVE_EMPLOYEES_ENDPOINT, APPOINTMENT_ENDPOINT, APPOINTMENTS_USER_ENDPOINT } from "./util/endpoints"
 import Layout from "./components/Layout/Layout";
 import { datePlusMinutes, APPOINTMENT_TIME_MINUTES } from "./util/datesAndTimes";
 import "./App.css";
@@ -35,27 +35,53 @@ const App = () =>  {
   const [customers, setCustomers] = useState([]);
   const [employees, setEmployees] = useState([]);
   
+  const logoutUser = () => {
+    sessionStorage.clear();
+    setLoggedInUser(null);
+    setAppointments(null);
+    setCustomers([]);
+    setEmployees([]);
+    setView("login");
+  };
+
   const onGetCustomerSuccess = (customers_array) => {
+    // console.log("Customers:")
+    // console.log(customers_array)
     setCustomers(customers_array);
     setLoading(false);
   };
+
+  const onGetSelfSuccess = (user_array) => {
+    // console.log("Self:")
+    // console.log(user_array)
+    setLoggedInUser(user_array[0]);
+    setLoading(false);
+
+    if (sessionStorage.getItem('UserGroup') === "Customers") setCustomers(user_array)
+    else if (sessionStorage.getItem('UserGroup') === "Employees") setEmployees(user_array)
+  };
+
   const onGetEmployeeSuccess = (employees_array) => {
+    // console.log("Employees:")
+    // console.log(employees_array)
     setEmployees(employees_array);
     setLoading(false);  
   };
+
   const onGetAppointmentsSuccess = (appointments_array) => {
     setAppointments(appointments_array);
     setLoading(false);  
   };
+  
   const setError = (errorMessage) => {
     alert(errorMessage);
     setLoading(false);
   };
+  
   const onPostAppointmentSuccess = (customers_array) => {
-    setCustomers(customers_array);
+    setView('appointments')
     setLoading(false);
   };
-  // const on
 
   const submitNewAppointment = (e) => {
 
@@ -70,7 +96,7 @@ const App = () =>  {
       }
 
       setLoading(true);
-      makeApiRequest("POST", APPOINTMENT_ENDPOINT, onPostAppointmentSuccess, setError, appointmentObject)
+      makeApiRequest("POST", APPOINTMENT_ENDPOINT, onPostAppointmentSuccess, setError, true, appointmentObject)
 
       setMakeAppointmentError("");
     } 
@@ -80,17 +106,31 @@ const App = () =>  {
   }
 
   useEffect(() => {
+    const token = sessionStorage.getItem('ApiToken')
+    const userGroup = sessionStorage.getItem('UserGroup')
+    // console.log(token)
+    if (token && userGroup && loggedInUser === null) {
+      // console.log('here')
+      let callback = userGroup === "Customers" ? onGetSelfSuccess : onGetCustomerSuccess
+      setLoading(true);
+      makeApiRequest("GET", ACTIVE_CUSTOMERS_ENDPOINT, callback, true, setError);
+  
+      callback = userGroup === "Employees" ? onGetSelfSuccess : onGetEmployeeSuccess
+      setLoading(true);
+      makeApiRequest("GET", ACTIVE_EMPLOYEES_ENDPOINT, callback, true, setError);
+    }
 
-    setLoading(true);
-    makeApiRequest("GET", ACTIVE_CUSTOMERS_ENDPOINT, onGetCustomerSuccess, setError)
+    if (loggedInUser) {
+      setLoading(true);
+      makeApiRequest("GET", APPOINTMENTS_USER_ENDPOINT + `${loggedInUser.id}/`, onGetAppointmentsSuccess, true, setError)
+    }
+    // else {
+    //   setView("login");
+    // }    
+    // setLoading(true);
+    // makeApiRequest("GET", APPOINTMENT_ENDPOINT, onGetAppointmentsSuccess, true, setError)
 
-    setLoading(true);
-    makeApiRequest("GET", ACTIVE_EMPLOYEES_ENDPOINT, onGetEmployeeSuccess, setError)
-
-    setLoading(true);
-    makeApiRequest("GET", APPOINTMENT_ENDPOINT, onGetAppointmentsSuccess, setError)
-
-  }, [setCustomers, setLoading, setEmployees]);
+  }, [loggedInUser, view]);
 
   return (
       <Layout 
@@ -105,8 +145,9 @@ const App = () =>  {
 
             // loginError={loginError}
             // setLoginError={setLoginError}
+            logoutUser={logoutUser}
             loggedInUser={loggedInUser}
-            setLoggedInUser={setLoggedInUser}
+            // setLoggedInUser={setLoggedInUser}
 
             customers={customers}
             customerSelected = {customerSelected}

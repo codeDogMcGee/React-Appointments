@@ -41,16 +41,21 @@ const Layout = (props) => {
             layoutComponent = <Login 
                                 // loginError={props.loginError}
                                 // loggedInUser={props.loggedInUser}
-                                setLoggedInUser={props.setLoggedInUser}
+                                // setLoggedInUser={props.setLoggedInUser}
+                                setView={props.setView}
                                 />
             break;
         default:
             layoutComponent = <div />
     }
 
+    // console.log(sessionStorage.getItem("User"))
+
+    const userNameString = props.loggedInUser ? props.loggedInUser.name : ""
+
     return (
         <div className="main-container">
-            <NavBar setView={props.setView} />
+            <NavBar setView={props.setView} loggedInUser={userNameString} logoutUser={props.logoutUser} />
 
             { layoutComponent }
 

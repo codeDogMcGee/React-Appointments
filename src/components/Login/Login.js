@@ -4,7 +4,7 @@ import { LOGIN_ENDPOINT } from "../../util/endpoints";
 
 import "./Login.css";
 
-const Login = ({loggedInUser, setLoggedInUser}) => {   
+const Login = ({ setView }) => {   
     const [areaCode, setAreaCode] = useState("");
     const [prefix, setPrefix] = useState("");
     const [suffix, setSuffix] = useState("");
@@ -16,12 +16,17 @@ const Login = ({loggedInUser, setLoggedInUser}) => {
 
         if (data.token) {
             sessionStorage.setItem('ApiToken', data.token);
+            sessionStorage.setItem('UserGroup', data.user_group)
+
             document.loginForm.areaCode.value = ""
             document.loginForm.prefix.value = ""
             document.loginForm.suffix.value = ""
+
+            setView("make-appointment");
+            // setLoggedInUser(null);
         }
         else {
-            loginError("Api token not received.", {})
+            loginError(data)
         }
     }
 
@@ -29,13 +34,10 @@ const Login = ({loggedInUser, setLoggedInUser}) => {
         document.loginForm.password.value = ""
 
         let errorsList = []
-        if (err.response.status === 400) {
-            for (const [key, value] of Object.entries(err.response.data)) {
-                if (key === "non_field_errors") errorsList.push(value)
-                else errorsList.push(`${key}: ${value}`);
-            }
+        for (const [key, value] of Object.entries(err.response.data)) {
+            if (key === "non_field_errors" || key === "detail") errorsList.push(value)
+            else errorsList.push(`${key}: ${value}`);
         }
-        else errorsList.push(`Unable to login at this time. Code=${err.response.status}`)
         
         setErrors(
             <ul className="errors errors-ul">
@@ -46,8 +48,7 @@ const Login = ({loggedInUser, setLoggedInUser}) => {
 
     const submitLogin = (e) => {
         e.preventDefault();
-
-
+        
         let errorsList = []
 
         const phoneNumberValidation = validatePhoneNumber();
@@ -60,12 +61,13 @@ const Login = ({loggedInUser, setLoggedInUser}) => {
         )
 
         const loginObject = {
-            username: phoneNumberValidation.phoneNumber,
+            phone: phoneNumberValidation.phoneNumber,
             password: document.loginForm.password.value
         }
 
-        if (errorsList.length === 0) makeApiRequest("POST", LOGIN_ENDPOINT, loginOnSuccess, loginError, loginObject)
-    }
+        if (errorsList.length === 0) makeApiRequest("POST", LOGIN_ENDPOINT, loginOnSuccess, loginError, false, loginObject)
+    };
+
 
     const validatePhoneNumber = () => {
         const phoneNumber = areaCode + prefix + suffix;
