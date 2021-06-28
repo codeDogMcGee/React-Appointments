@@ -1,0 +1,12 @@
+.appointment-btn {
+    margin: 0 .5rem;
+    padding: 0 .5rem;
+
+    background-color: white;
+    border-radius: 20px;
+}
+
+.appointments-list {
+    margin: 1rem 0;
+    list-style: none; 
+}

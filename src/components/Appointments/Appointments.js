@@ -1,30 +1,25 @@
-import { formatPhoneNumber } from "../../util/stringFormatting";
 import "./Appointments.css";
 
-const Appointments = ({loading,  appointments, employees, customers}) => {
+const Appointments = ({loading,  appointments, deleteAppointmentById}) => {
 
-    const getEmployee = (id) => {
-        return employees.find(employee => employee.id === id).name;
-    };
-
-    const getCustomer = (id) => {
-        const customer = customers.find(customer => customer.id === id)
-        return `${customer.name} ${formatPhoneNumber(customer.phone)}`;
-    };
-
-    if (loading) {
-        return <div>Loading...</div>;
-    } else {
+    const deleteButton = (appointmentId) => {
+        return <button className="appointment-btn" onClick={() => deleteAppointmentById(appointmentId)}>Cancel</button>
+    }
+ 
+    if (appointments && loading === false) {
         return (
-            <div className="customer-container">
+            <div className="appointments-container">
               <h2 className="header">Appointments</h2>
-              <ul>
+              <ul className="appointments-list">
                   {appointments.map((appointment, i) => {
-                      return <li key={i}>{appointment.start_time.replace('T', ' ')}  |  {getEmployee(appointment.employee)}  |  {getCustomer(appointment.customer)}</li> 
+                      return <li key={i}>{deleteButton(appointment.id)}{appointment.startTime} with {appointment.otherPerson}</li> 
                   })}
               </ul>
             </div>
           );
+    }
+    else {
+        return <div>Loading...</div>;
     }
     
   }

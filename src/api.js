@@ -2,45 +2,41 @@ import axios from "axios";
 
 const BASE_DOMAIN = "http://127.0.0.1:8000/";
 
+const getUrl = endpoint => `${BASE_DOMAIN}${endpoint}`;
 
-const makeApiRequest = async (requstType, endpoint, onSuccess, onError, includeApiToken=true, data=null) => {
-    const url = `${BASE_DOMAIN}${endpoint}`
-    requstType = requstType.toUpperCase()
+const makeApiGetRequest = (endpoint, setLoading, onSuccess, onError, includeApiToken=true) => {
+    setLoading(true);
 
-    let headersObject = {}
-    if (includeApiToken) headersObject = { Authorization: `token ${sessionStorage.getItem('ApiToken')}`, };
-
-    if (requstType === "POST") {
-        // if (data){
-        axios
-        .post(url, data, {
-            method: requstType,
-            headers: headersObject,
+    axios
+        .get(getUrl(endpoint), {
+            method: "GET",
+            headers: includeApiToken ? { Authorization: `token ${sessionStorage.getItem('ApiToken')}`, } : {},
         })
         .then(({ data }) => onSuccess(data))
         .catch((err) => onError(err));
-        // } else {
-        //     throw Error(`Must supply a data object with a POST request.`);
-        // }
-    } 
-    else if (requstType === "GET") 
-    {
-        axios
-        .get(url, {
-            method: requstType,
-            headers: headersObject,
+};
+    
+const makeApiPostRequest = (endpoint, setLoading, onSuccess, onError, data, includeApiToken=true) => {
+    setLoading(true);
+
+    axios
+        .post(getUrl(endpoint), data, {
+            method: "POST",
+            headers: includeApiToken ? { Authorization: `token ${sessionStorage.getItem('ApiToken')}`, } : {},
         })
         .then(({ data }) => onSuccess(data))
         .catch((err) => onError(err));
-    }
-    else {
-        throw Error(`Invalid requestType "${requstType}". Must be "GET" or "POST".`);
-    }
-}
+};  
 
-    
-    
+const makeApiDeleteRequest = (endpoint, setLoading, onSuccess, onError, includeApiToken=true) => {
+    setLoading(true);
+    axios
+        .delete(getUrl(endpoint), {
+            method: "DELETE",
+            headers: includeApiToken ? { Authorization: `token ${sessionStorage.getItem('ApiToken')}`, } : {},
+        })
+        .then((response) => onSuccess(response))
+        .catch((err) => onError(err));
+};
 
-
-
-export default makeApiRequest;
+export { makeApiPostRequest, makeApiGetRequest, makeApiDeleteRequest }

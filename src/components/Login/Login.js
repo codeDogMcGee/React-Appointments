@@ -1,10 +1,10 @@
 import { useState } from "react";
-import makeApiRequest from "../../api";
+import { makeApiPostRequest } from "../../api";
 import { LOGIN_ENDPOINT } from "../../util/endpoints";
 
 import "./Login.css";
 
-const Login = ({ setView }) => {   
+const Login = ({ setView, setLoading }) => {   
     const [areaCode, setAreaCode] = useState("");
     const [prefix, setPrefix] = useState("");
     const [suffix, setSuffix] = useState("");
@@ -16,7 +16,7 @@ const Login = ({ setView }) => {
 
         if (data.token) {
             sessionStorage.setItem('ApiToken', data.token);
-            sessionStorage.setItem('UserGroup', data.user_group)
+            // sessionStorage.setItem('UserGroup', data.user_group)
 
             document.loginForm.areaCode.value = ""
             document.loginForm.prefix.value = ""
@@ -31,19 +31,26 @@ const Login = ({ setView }) => {
     }
 
     const loginError = (err) => {
-        document.loginForm.password.value = ""
 
-        let errorsList = []
-        for (const [key, value] of Object.entries(err.response.data)) {
-            if (key === "non_field_errors" || key === "detail") errorsList.push(value)
-            else errorsList.push(`${key}: ${value}`);
+        if (err.response) {
+            let errorsList = []
+            for (const [key, value] of Object.entries(err.response.data)) {
+                if (key === "non_field_errors" || key === "detail") errorsList.push(value)
+                else errorsList.push(`${key}: ${value}`);
+            }
+            
+            setErrors(
+                <ul className="errors errors-ul">
+                    {errorsList.map( (error, i) => <li key={i}>{ error }</li> )}
+                </ul>
+            )
         }
-        
-        setErrors(
-            <ul className="errors errors-ul">
-                {errorsList.map( (error, i) => <li key={i}>{ error }</li> )}
-            </ul>
-        )
+        else {
+            console.log(err)
+        }
+
+        // document.getElementById("password-input").value = ""
+
     };
 
     const submitLogin = (e) => {
@@ -65,7 +72,7 @@ const Login = ({ setView }) => {
             password: document.loginForm.password.value
         }
 
-        if (errorsList.length === 0) makeApiRequest("POST", LOGIN_ENDPOINT, loginOnSuccess, loginError, false, loginObject)
+        if (errorsList.length === 0) makeApiPostRequest(LOGIN_ENDPOINT, setLoading, loginOnSuccess, loginError, loginObject, false)
     };
 
 
@@ -115,7 +122,7 @@ const Login = ({ setView }) => {
             </div>
             
             <label>Password:</label>
-            <input name="password" type="password" />
+            <input id="password-input" name="password" type="password" />
             
             <input type="submit" value="Login" className="btn" />
         </form>

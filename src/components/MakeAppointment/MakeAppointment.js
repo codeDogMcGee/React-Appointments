@@ -1,3 +1,4 @@
+// import { useState } from "react";
 import DatePickerComponent from "../DatePicker/DatePicker";
 import UserSelectComponent from "../UserSelectComponent/UserSelectComponent";
 
@@ -11,15 +12,13 @@ const MakeAppointment = ({
                             appointmentDateTimePicked, 
                             setAppointmentDateTimePicked, 
 
-                            customers, 
-                            employees,
-                            
-                            customerSelected,
-                            employeeSelected,
-                            
-                            setCustomerSelected,
-                            setEmployeeSelected
+                            userGroup,
+                            customersOrEmployees,
+                            // customerOrEmployeeSelected,
+                            setCustomerOrEmployeeSelected
                         }) => {
+    
+    const selectLabel = userGroup === "Employees" ? "Customer" : "Nail Artist"
 
     if (loading) {
         return <div>Loading...</div>;
@@ -29,10 +28,11 @@ const MakeAppointment = ({
             <h2>Make an Appointment</h2>
             <form onSubmit={submitNewAppointment}>
                 <label>
-                    Employee: <UserSelectComponent selectList={employees} setSelectValue={setEmployeeSelected} selectedValue={employeeSelected} />
-                </label>
-                <label>
-                    Customer: <UserSelectComponent selectList={customers} setSelectValue={setCustomerSelected} selectedValue={customerSelected} />
+                    {selectLabel}: <UserSelectComponent 
+                                        selectList={customersOrEmployees} 
+                                        setSelectValue={setCustomerOrEmployeeSelected} 
+                                        // selectedValue={customerOrEmployeeSelected} 
+                                    />
                 </label>
                 <label>
                     Date:

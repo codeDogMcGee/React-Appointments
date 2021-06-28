@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 
-import makeApiRequest from "./api";
-import { ACTIVE_CUSTOMERS_ENDPOINT, ACTIVE_EMPLOYEES_ENDPOINT, APPOINTMENT_ENDPOINT, APPOINTMENTS_USER_ENDPOINT } from "./util/endpoints"
+import { makeApiGetRequest, makeApiPostRequest, makeApiDeleteRequest } from "./api";
+import { 
+  GROUPS_ENDPOINT, 
+  ACTIVE_CUSTOMERS_ENDPOINT, 
+  ACTIVE_EMPLOYEES_ENDPOINT, 
+  GET_SELF_USER_ENDPONT,
+  APPOINTMENT_ENDPOINT, 
+  APPOINTMENTS_USER_ENDPOINT 
+} from "./util/endpoints"
 import Layout from "./components/Layout/Layout";
 import { datePlusMinutes, APPOINTMENT_TIME_MINUTES } from "./util/datesAndTimes";
 import "./App.css";
@@ -32,53 +39,72 @@ const App = () =>  {
   const [loggedInUser, setLoggedInUser] = useState(null);
 
   // Users state
-  const [customers, setCustomers] = useState([]);
-  const [employees, setEmployees] = useState([]);
+  const [customers, setCustomers] = useState(null);
+  const [employees, setEmployees] = useState(null);
+  const [groups, setGroups] = useState(null);
+
   
   const logoutUser = () => {
     sessionStorage.clear();
+    setAppointmentDateTimePicked(null);
     setLoggedInUser(null);
     setAppointments(null);
-    setCustomers([]);
-    setEmployees([]);
+    setCustomers(null);
+    setEmployees(null);
+    setGroups(null);
+    setCustomerSelected(null);
+    setEmployeeSelected(null);
+    setMakeAppointmentError("");
     setView("login");
   };
 
   const onGetCustomerSuccess = (customers_array) => {
-    // console.log("Customers:")
-    // console.log(customers_array)
     setCustomers(customers_array);
     setLoading(false);
   };
 
-  const onGetSelfSuccess = (user_array) => {
-    // console.log("Self:")
-    // console.log(user_array)
-    setLoggedInUser(user_array[0]);
-    setLoading(false);
-
-    if (sessionStorage.getItem('UserGroup') === "Customers") setCustomers(user_array)
-    else if (sessionStorage.getItem('UserGroup') === "Employees") setEmployees(user_array)
-  };
-
   const onGetEmployeeSuccess = (employees_array) => {
-    // console.log("Employees:")
-    // console.log(employees_array)
     setEmployees(employees_array);
     setLoading(false);  
   };
 
+  const onGetGroupsSuccess = (groups_array) => {
+    setLoading(false);  
+    setGroups( groups_array.map(group => {
+      return {
+        groupName: group.group_name,
+        groupId: group.group_id
+      }
+    }) )
+  };
+
   const onGetAppointmentsSuccess = (appointments_array) => {
-    setAppointments(appointments_array);
+    const newArray = appointments_array.map((appointment, i) => {
+      appointment.start_time = new Date(appointment.start_time)
+      appointment.end_time = new Date(appointment.end_time)
+      return appointment;
+    });
+
+    setAppointments(newArray);
     setLoading(false);  
   };
   
+  const deleteAppointmentById = (appointmentId) => {
+    const onSuccess = () => {
+      makeApiGetRequest(APPOINTMENTS_USER_ENDPOINT + `${loggedInUser.id}/`, setLoading, onGetAppointmentsSuccess, setError);
+      setLoading(false);
+    }
+    makeApiDeleteRequest(APPOINTMENT_ENDPOINT + `${appointmentId}/`, setLoading, onSuccess, setError);
+  };
+
   const setError = (errorMessage) => {
+    console.log(errorMessage)
     alert(errorMessage);
     setLoading(false);
   };
   
-  const onPostAppointmentSuccess = (customers_array) => {
+  const onPostAppointmentSuccess = (appointment) => {
+    makeApiGetRequest(APPOINTMENTS_USER_ENDPOINT + `${loggedInUser.id}/`, setLoading, onGetAppointmentsSuccess, setError);
     setView('appointments')
     setLoading(false);
   };
@@ -87,16 +113,28 @@ const App = () =>  {
 
     e.preventDefault()
 
-    if (employeeSelected && customerSelected && appointmentDateTimePicked) {
-      const appointmentObject = {
+    let appointmentObject = null;
+
+    if (appointmentDateTimePicked && employeeSelected && loggedInUser.group === "Customers") {
+      appointmentObject = {
+        start_time: appointmentDateTimePicked,
+        end_time: datePlusMinutes(appointmentDateTimePicked, APPOINTMENT_TIME_MINUTES),
+        customer: loggedInUser.id,
+        employee: employeeSelected.id
+      }
+    }
+    else if (appointmentDateTimePicked && customerSelected && loggedInUser.group === "Customers") {
+      appointmentObject = {
         start_time: appointmentDateTimePicked,
         end_time: datePlusMinutes(appointmentDateTimePicked, APPOINTMENT_TIME_MINUTES),
         customer: customerSelected.id,
-        employee: employeeSelected.id
+        employee: loggedInUser.id
       }
+    }
 
-      setLoading(true);
-      makeApiRequest("POST", APPOINTMENT_ENDPOINT, onPostAppointmentSuccess, setError, true, appointmentObject)
+    if (appointmentObject) {
+
+      makeApiPostRequest(APPOINTMENT_ENDPOINT, setLoading, onPostAppointmentSuccess, setError, appointmentObject)
 
       setMakeAppointmentError("");
     } 
@@ -106,35 +144,49 @@ const App = () =>  {
   }
 
   useEffect(() => {
-    const token = sessionStorage.getItem('ApiToken')
-    const userGroup = sessionStorage.getItem('UserGroup')
-    // console.log(token)
-    if (token && userGroup && loggedInUser === null) {
-      // console.log('here')
-      let callback = userGroup === "Customers" ? onGetSelfSuccess : onGetCustomerSuccess
-      setLoading(true);
-      makeApiRequest("GET", ACTIVE_CUSTOMERS_ENDPOINT, callback, true, setError);
+    const onGetSelfSuccess = (self_object) => {
+
+      const self_group_id = self_object.groups[0];
+      if (groups) {
+        const group = groups.find(group => group.groupId === self_group_id);
   
-      callback = userGroup === "Employees" ? onGetSelfSuccess : onGetEmployeeSuccess
-      setLoading(true);
-      makeApiRequest("GET", ACTIVE_EMPLOYEES_ENDPOINT, callback, true, setError);
+        setLoggedInUser({...self_object, ...{group: group.groupName}});
+        setLoading(false);
+      }
+    };
+
+    if (sessionStorage.getItem('ApiToken')) {
+      if (groups === null){
+        makeApiGetRequest(GROUPS_ENDPOINT, setLoading, onGetGroupsSuccess, setError);
+      }
+      
+      if (loggedInUser){
+
+        if (appointments === null) {
+          makeApiGetRequest(APPOINTMENTS_USER_ENDPOINT + `${loggedInUser.id}/`, setLoading, onGetAppointmentsSuccess, setError)
+        }
+        if (employees === null) {
+          makeApiGetRequest(ACTIVE_EMPLOYEES_ENDPOINT, setLoading, onGetEmployeeSuccess, setError);
+        }
+        if (customers === null) {
+          makeApiGetRequest(ACTIVE_CUSTOMERS_ENDPOINT, setLoading, onGetCustomerSuccess, setError);
+        }
+
+      }
+      else {
+        makeApiGetRequest(GET_SELF_USER_ENDPONT, setLoading, onGetSelfSuccess, setError);
+      }
+    }
+    else if (view !== "login") {
+      setView("login");
     }
 
-    if (loggedInUser) {
-      setLoading(true);
-      makeApiRequest("GET", APPOINTMENTS_USER_ENDPOINT + `${loggedInUser.id}/`, onGetAppointmentsSuccess, true, setError)
-    }
-    // else {
-    //   setView("login");
-    // }    
-    // setLoading(true);
-    // makeApiRequest("GET", APPOINTMENT_ENDPOINT, onGetAppointmentsSuccess, true, setError)
-
-  }, [loggedInUser, view]);
+  }, [appointments, customers, employees, groups, loggedInUser, view]);
 
   return (
       <Layout 
             loading={loading}
+            setLoading={setLoading}
             makeAppointmentError={makeAppointmentError}
 
             view={view} 
@@ -142,6 +194,7 @@ const App = () =>  {
             
             appointmentDateTimePicked={appointmentDateTimePicked}
             setAppointmentDateTimePicked={setAppointmentDateTimePicked}
+            deleteAppointmentById={deleteAppointmentById}
 
             // loginError={loginError}
             // setLoginError={setLoginError}
@@ -150,11 +203,11 @@ const App = () =>  {
             // setLoggedInUser={setLoggedInUser}
 
             customers={customers}
-            customerSelected = {customerSelected}
+            // customerSelected = {customerSelected}
             setCustomerSelected = {setCustomerSelected}
             
             employees={employees}
-            employeeSelected={employeeSelected}
+            // employeeSelected={employeeSelected}
             setEmployeeSelected={setEmployeeSelected}
             
             appointments={appointments}
