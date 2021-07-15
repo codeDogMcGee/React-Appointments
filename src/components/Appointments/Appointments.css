@@ -2,7 +2,10 @@
     margin: 0 .5rem;
     padding: 0 .5rem;
 
-    background-color: white;
+    background-color: var(--color-button);
+    color: white;
+
+    border-width: 1px;
     border-radius: 20px;
 }
 

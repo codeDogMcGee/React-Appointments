@@ -4,6 +4,7 @@ import Appointments from "../Appointments/Appointments";
 import Login from "../Login/Login";
 import { getCustomerFromId, getEmployeeFromId } from "../../util/stringFormatting";
 import { formatDateToString } from "../../util/stringFormatting";
+import RequestEmailKey from "../RequestEmailKey/RequestEmailKey";
 
 const Layout = (props) => {
 
@@ -69,17 +70,19 @@ const Layout = (props) => {
                                 setView={props.setView}
                                 />
             break;
+        case "request-email-verification":
+            layoutComponent = <RequestEmailKey
+                                setLoading={props.setLoading}
+                                setView={props.setView}
+                                />
+            break;
         default:
             layoutComponent = <div />
     }
 
-    // console.log(sessionStorage.getItem("User"))
-
-    const userNameString = props.loggedInUser ? props.loggedInUser.name : ""
-
     return (
         <div className="main-container">
-            <NavBar setView={props.setView} loggedInUser={userNameString} logoutUser={props.logoutUser} />
+            <NavBar setView={props.setView} loggedInUser={props.loggedInUser} logoutUser={props.logoutUser} />
 
             { layoutComponent }
 

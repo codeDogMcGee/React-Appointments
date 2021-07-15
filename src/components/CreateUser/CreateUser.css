@@ -1,0 +1,11 @@
+:root {
+    --color-success: #00455C;
+    --color-error: #BD2D2D;
+}
+
+#key-message {
+    margin: 0;
+    padding: 0;
+    font-size: .8rem;
+    color: var(--color-success);
+}

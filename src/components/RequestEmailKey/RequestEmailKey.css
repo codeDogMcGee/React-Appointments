@@ -1,0 +1,30 @@
+:root {
+    --color-success: #00455C;
+    --color-error: #BD2D2D;
+}
+
+#email-ver-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+}
+
+#email-ver-form {
+    max-width: 15rem;
+}
+
+#instructions {
+    text-align: center;
+    max-width: 30rem;
+    font-size: .8rem;
+}
+
+#success {
+    color: var(--color-success);
+    margin: 1rem 0;
+}
+
+#errors {
+    margin: 1rem 0;
+}

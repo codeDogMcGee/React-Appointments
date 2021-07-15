@@ -9,25 +9,29 @@ const NavBar = ({ loggedInUser, setView, logoutUser}) => {
     }
 
     const buttonClick = (e) => {
-        console.log()
         const buttonName = e.target.name;
         if (buttonName === "logout") logoutUser();
         else setViewOnClick(buttonName);
     }
 
-    const authenticatedUserButtons = [
-        {name: 'make-appointment', text: "Make Appointment"},
-        {name: 'appointments', text: "View Appointments"},
-        {name: 'logout', text: "Logout"}
-    ];
+    const authenticatedUserButtons = () => {
+        if (loggedInUser && loggedInUser.group === "Employees") {
+            return [
+                    {name: 'appointments', text: "View Appointments"},
+                    {name: 'logout', text: "Logout"}
+                ]
+        }  else {
+            return [
+                {name: 'make-appointment', text: "Make Appointment"},
+                {name: 'appointments', text: "View Appointments"},
+                {name: 'logout', text: "Logout"}
+            ]
+        }
+    }
 
-    const unauthenticatedUserButtons = [
-        {name: "login", text: "Login"}
-    ];
-
-    const userButtons = userIsAuthenticated ? authenticatedUserButtons : unauthenticatedUserButtons;
+    const userButtons = userIsAuthenticated ? authenticatedUserButtons() : [];
     
-    const userName = userIsAuthenticated ? <span>{loggedInUser}</span> : <span />;
+    const userName = userIsAuthenticated ? <div id="user-greeting"> Hi, {loggedInUser.name} :)</div> : <span />;
     
     return (
         <div id="nav">
@@ -35,7 +39,7 @@ const NavBar = ({ loggedInUser, setView, logoutUser}) => {
             <div className="nav-buttons">
                 { userName }
                 
-                {userButtons.map( (button, i) => <button key={i} name={button.name} className="btn" onClick={buttonClick}>{button.text}</button>)}
+                {userButtons.map( (button, i) => <button key={i} name={button.name} onClick={buttonClick}>{button.text}</button>)}
 
             </div>
         </div>

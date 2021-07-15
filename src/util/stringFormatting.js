@@ -22,8 +22,6 @@ const formatDateToString = (jsDateObject) => {
 
 
 const getEmployeeFromId = (id, employees) => {
-    console.log(id)
-    console.log(employees)
     return employees.find(employee => employee.id === id).name;
 };
 
@@ -33,4 +31,20 @@ const getCustomerFromId = (id, customers) => {
     return `${customer.name} ${formatPhoneNumber(customer.phone)}`;
 };
 
-export { formatDateToString, getEmployeeFromId, getCustomerFromId };
+
+const formatErrors = (errors) => {
+        
+    let output = "";
+    if (Array.isArray(errors)) {
+        
+        output = <ul className="errors errors-ul">
+                    {errors.map( (error, i) => <li key={i}>{ error }</li> )}
+                </ul>
+
+    } else {
+       output = <p id="errors">{errors.toString()}</p>; 
+    }
+    return output
+}
+
+export { formatDateToString, getEmployeeFromId, getCustomerFromId, formatErrors };

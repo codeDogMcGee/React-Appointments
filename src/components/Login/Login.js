@@ -1,133 +1,84 @@
 import { useState } from "react";
 import { makeApiPostRequest } from "../../api";
 import { LOGIN_ENDPOINT } from "../../util/endpoints";
-
+import { formatErrors } from "../../util/stringFormatting";
 import "./Login.css";
 
 const Login = ({ setView, setLoading }) => {   
-    const [areaCode, setAreaCode] = useState("");
-    const [prefix, setPrefix] = useState("");
-    const [suffix, setSuffix] = useState("");
 
-    const [errors, setErrors] = useState(<ul />);
+    const [email, setEmail] = useState("");
+    const [errors, setErrors] = useState(null);
 
     const loginOnSuccess = (data) => {
         document.loginForm.password.value = ""
 
         if (data.token) {
             sessionStorage.setItem('ApiToken', data.token);
-            // sessionStorage.setItem('UserGroup', data.user_group)
-
-            document.loginForm.areaCode.value = ""
-            document.loginForm.prefix.value = ""
-            document.loginForm.suffix.value = ""
-
-            setView("make-appointment");
-            // setLoggedInUser(null);
+        
+            document.loginForm.email.value = ""
+            
+            setView("");
         }
         else {
-            loginError(data)
+            setErrors(["Error logging in. Please try again later."])
         }
     }
-
-    const loginError = (err) => {
-
-        if (err.response) {
-            let errorsList = []
-            for (const [key, value] of Object.entries(err.response.data)) {
-                if (key === "non_field_errors" || key === "detail") errorsList.push(value)
-                else errorsList.push(`${key}: ${value}`);
-            }
-            
-            setErrors(
-                <ul className="errors errors-ul">
-                    {errorsList.map( (error, i) => <li key={i}>{ error }</li> )}
-                </ul>
-            )
-        }
-        else {
-            console.log(err)
-        }
-
-        // document.getElementById("password-input").value = ""
-
-    };
 
     const submitLogin = (e) => {
         e.preventDefault();
         
-        let errorsList = []
-
-        const phoneNumberValidation = validatePhoneNumber();
-        if (phoneNumberValidation.errors) errorsList = [...phoneNumberValidation.errors]
-
-        setErrors(
-            <ul className="errors errors-ul">
-                {errorsList.map( (error, i) => <li key={i}>{ error }</li> )}
-            </ul>
-        )
+        const emailValidation = validateEmail();
+      
+        if (emailValidation.errors) setErrors([emailValidation.errors])
 
         const loginObject = {
-            phone: phoneNumberValidation.phoneNumber,
+            email:document.loginForm.email.value,
             password: document.loginForm.password.value
         }
 
-        if (errorsList.length === 0) makeApiPostRequest(LOGIN_ENDPOINT, setLoading, loginOnSuccess, loginError, loginObject, false)
+        if (emailValidation.errors === null) makeApiPostRequest(LOGIN_ENDPOINT, setLoading, loginOnSuccess, setErrors, loginObject, false)
     };
 
-
-    const validatePhoneNumber = () => {
-        const phoneNumber = areaCode + prefix + suffix;
-
+    const validateEmail = () => {
         let errorList = [];
-        if (phoneNumber.length !== 10) errorList.push("Phone number must have 10 digits.");
-
-        if (/^\d+$/.test(phoneNumber) === false) errorList.push("Phone number contains non-numerical values.");
-
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (re.test(String(email).toLowerCase()) === false) errorList.push("Not a valid email address.");
         return {
-            phoneNumber: phoneNumber,
-            errors: errorList.length === 0 ? null : errorList 
+            email: email,
+            errors: errorList.length === 0 ? null : errorList
         }
     };
 
-    const areaCodeOnChange = (e) => {
-        if (e.target.value.length.toString() === e.target.getAttribute("maxlength")) {
-            document.loginForm.prefix.focus();
-        }
-        setAreaCode(e.target.value);
+    const emailOnChange = (e) => {
+        setEmail(e.target.value);
     };
 
-    const prefixOnChange = (e) => {
-        if (e.target.value.length.toString() === e.target.getAttribute("maxlength")) {
-            document.loginForm.suffix.focus();
-        }
-        setPrefix(e.target.value);
+    const onRegisterClick = () => {
+        setView("request-email-verification");
     };
-    const suffixOnChange = (e) => {
-        if (e.target.value.length.toString() === e.target.getAttribute("maxlength")) {
-            document.loginForm.password.focus();
-        }
-        setSuffix(e.target.value);
-    };
+
+    const responseMessage = errors ? formatErrors(errors) : "";
 
     return (
         <div id="login-container">
         <h2>Login</h2>
         <form name="loginForm" id="login-form" onSubmit={submitLogin}>
-            <label>Phone:</label>
-            <div id="phone-inputs">
-                <input id="area-code" name="areaCode" type="text" maxLength="3" value={areaCode} onChange={ areaCodeOnChange } /> 
-                <input id="prefix" name="prefix"  type="text" maxLength="3" value={prefix} onChange={ prefixOnChange } /> 
-                <input id="suffix" name="suffix" type="text"  maxLength="4" value={suffix} onChange={ suffixOnChange } />
-            </div>
             
+            <label>Email:</label>
+            <input id="email" name="email" type="text" value={email} onChange={emailOnChange}/>
+
             <label>Password:</label>
             <input id="password-input" name="password" type="password" />
             
             <input type="submit" value="Login" className="btn" />
         </form>
+
+        <div className="register-container">
+            <p>Don't have an account yet? Click below to create one!</p>
+            <button className="btn register-btn" name="register" onClick={onRegisterClick}>Create New Account</button>
+        </div>
         
-        {errors}
+        {responseMessage}
 
     </div>
           );

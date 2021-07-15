@@ -14,16 +14,11 @@ import { datePlusMinutes, APPOINTMENT_TIME_MINUTES } from "./util/datesAndTimes"
 import "./App.css";
 
 
-// const DEFAULT_NEW_APPOINTMENT = {
-//   startDateTime: null,
-//   endDateTime: null,
-//   customer: null,
-//   employee: null
-// }
+const DEFAULT_VIEW = "";
 
 const App = () =>  {
   // View state
-  const [view, setView] = useState("");
+  const [view, setView] = useState(DEFAULT_VIEW);
   const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState(null)
 
@@ -31,11 +26,9 @@ const App = () =>  {
   const [appointmentDateTimePicked, setAppointmentDateTimePicked] = useState(null);
   const [employeeSelected, setEmployeeSelected] = useState(null);
   const [customerSelected, setCustomerSelected] = useState(null);
-  // const [newAppointment, setNewAppointemnt] = useState(DEFAULT_NEW_APPOINTMENT);
   const [makeAppointmentError, setMakeAppointmentError] = useState("");
 
   // Login state
-  // const [loginError, setLoginError] = useState("");
   const [loggedInUser, setLoggedInUser] = useState(null);
 
   // Users state
@@ -55,7 +48,7 @@ const App = () =>  {
     setCustomerSelected(null);
     setEmployeeSelected(null);
     setMakeAppointmentError("");
-    setView("login");
+    setView("");
   };
 
   const onGetCustomerSuccess = (customers_array) => {
@@ -97,9 +90,16 @@ const App = () =>  {
     makeApiDeleteRequest(APPOINTMENT_ENDPOINT + `${appointmentId}/`, setLoading, onSuccess, setError);
   };
 
-  const setError = (errorMessage) => {
-    console.log(errorMessage)
-    alert(errorMessage);
+  const setError = (errors) => {
+    
+    if (Array.isArray(errors)) {
+    
+      errors.forEach( error => {
+        console.log("API ERROR:", error)
+      });
+    
+    } else console.log("API ERROR:", errors.toSting())
+
     setLoading(false);
   };
   
@@ -172,12 +172,17 @@ const App = () =>  {
           makeApiGetRequest(ACTIVE_CUSTOMERS_ENDPOINT, setLoading, onGetCustomerSuccess, setError);
         }
 
+        if (view === "" || view === "login") {
+          if (loggedInUser.group === "Customers") setView("make-appointment");
+          else setView("appointments");
+        }
+
       }
       else {
         makeApiGetRequest(GET_SELF_USER_ENDPONT, setLoading, onGetSelfSuccess, setError);
       }
     }
-    else if (view !== "login") {
+    else if (view === "") {
       setView("login");
     }
 
@@ -196,25 +201,18 @@ const App = () =>  {
             setAppointmentDateTimePicked={setAppointmentDateTimePicked}
             deleteAppointmentById={deleteAppointmentById}
 
-            // loginError={loginError}
-            // setLoginError={setLoginError}
             logoutUser={logoutUser}
             loggedInUser={loggedInUser}
-            // setLoggedInUser={setLoggedInUser}
 
             customers={customers}
-            // customerSelected = {customerSelected}
             setCustomerSelected = {setCustomerSelected}
             
             employees={employees}
-            // employeeSelected={employeeSelected}
             setEmployeeSelected={setEmployeeSelected}
             
             appointments={appointments}
 
             submitNewAppointment={submitNewAppointment}
-            // newAppointment={newAppointment}
-            // setNewAppointemnt={setNewAppointemnt}
       />
   );
 }

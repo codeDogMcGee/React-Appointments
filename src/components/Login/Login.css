@@ -1,3 +1,8 @@
+:root {
+    --color-dark-gray: #4B4B4B;
+    --color-button: #00455C;
+  }
+
 .main-container {
     display: flex;
     flex-direction: column;
@@ -17,6 +22,23 @@
     max-width: 75px;
 }
 
+.register-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .btn {
+    margin: .5rem 0;
     justify-self: center;
+    min-width: 150px;
+    max-width: 300px;
+    background-color: transparent;
+    border-radius: 10px;
+    padding: .5rem 1rem;
+}
+
+.register-btn {
+    background-color: #00455C;
+    color: white;
 }

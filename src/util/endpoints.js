@@ -5,6 +5,8 @@ const GET_SELF_USER_ENDPONT = "user/self/";
 const APPOINTMENT_ENDPOINT = "appointments/";
 const APPOINTMENTS_USER_ENDPOINT = "appointments-user/";
 const LOGIN_ENDPOINT = "api-token-auth/";
+const EMAIL_VERIFICATION_TOKEN = "email-verification-token/";
+const CREATE_NEW_CUSTOMER = "create-customer/";
 
 /// The endpoints available should depend on the logged in user
 
@@ -15,5 +17,7 @@ export {
     GET_SELF_USER_ENDPONT,
     APPOINTMENT_ENDPOINT, 
     LOGIN_ENDPOINT, 
-    APPOINTMENTS_USER_ENDPOINT 
+    APPOINTMENTS_USER_ENDPOINT,
+    EMAIL_VERIFICATION_TOKEN,
+    CREATE_NEW_CUSTOMER
 };

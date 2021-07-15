@@ -1,3 +1,8 @@
+:root {
+    --color-dark-gray: #4B4B4B;
+    --color-button: #00455C;
+  }
+
 #nav {
     width: 100%;
     display: grid;
@@ -9,6 +14,7 @@
     width: 50%;
     min-width: 100px;
     margin: 2rem;
+    color: var(--color-dark-gray);
     background-color: transparent;
     border: none;
 }
@@ -18,9 +24,21 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
-
 }
 
-.nav-buttons button{
+.nav-buttons button {
     width: 40%;
+    min-width: 150px;
+    max-width: 200px;;
+    padding: .2rem 0;
+    margin: .2rem 0;
+    background-color: var(--color-button);
+    color: white;
+    /* border: none; */
+    border-width: 1px;
+    border-radius: 5px;
+}
+
+#user-greeting {
+    margin: .2rem 0
 }
